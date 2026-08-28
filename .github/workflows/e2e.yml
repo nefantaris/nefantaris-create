@@ -1,0 +1,64 @@
+name: E2E Tests
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    e2e:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  path: nefantaris-create
+
+            - uses: actions/checkout@v7
+              with:
+                  repository: nefantaris/nefantaris-core
+                  path: nefantaris-core
+
+            - uses: actions/checkout@v7
+              with:
+                  repository: nefantaris/nefantaris-theme-base
+                  path: nefantaris-theme-base
+
+            - uses: actions/checkout@v7
+              with:
+                  repository: nefantaris/nefantaris-theme-docs
+                  path: nefantaris-theme-docs
+
+            - uses: actions/checkout@v7
+              with:
+                  repository: nefantaris/nefantaris-plugin-date-fns
+                  path: nefantaris-plugin-date-fns
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: "24.19.0"
+                  cache: "npm"
+                  cache-dependency-path: nefantaris-create/package-lock.json
+
+            - name: Install Nefantaris core dependencies
+              run: npm install
+              working-directory: nefantaris-core
+
+            - name: Build Nefantaris core
+              run: npm run build
+              working-directory: nefantaris-core
+
+            - name: Install site template dependencies
+              run: npm install
+              working-directory: nefantaris-core/site-template
+
+            - name: Install dependencies
+              run: npm install
+              working-directory: nefantaris-create
+
+            - name: Run E2E tests
+              run: npm run test:e2e
+              working-directory: nefantaris-create

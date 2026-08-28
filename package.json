@@ -1,0 +1,42 @@
+{
+    "name": "create-nefantaris",
+    "version": "0.0.0",
+    "description": "Bootstraps a content-only Nefantaris site with one npx command",
+    "license": "MIT",
+    "author": "Adam Sturge",
+    "homepage": "https://github.com/nefantaris/nefantaris-create#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nefantaris/nefantaris-create.git"
+    },
+    "bugs": {
+        "url": "https://github.com/nefantaris/nefantaris-create/issues"
+    },
+    "type": "module",
+    "bin": {
+        "create-nef": "dist/cli/index.js",
+        "create-nefantaris": "dist/cli/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "engines": {
+        "node": ">=20.19.0"
+    },
+    "scripts": {
+        "build": "tsc",
+        "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.e2e.json",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "test:e2e": "npm run build && tsx --test \"e2e/*.spec.ts\""
+    },
+    "dependencies": {
+        "@clack/prompts": "1.7.0"
+    },
+    "devDependencies": {
+        "@types/node": "26.3.0",
+        "prettier": "3.9.6",
+        "tsx": "4.23.12",
+        "typescript": "7.0.2"
+    }
+}
