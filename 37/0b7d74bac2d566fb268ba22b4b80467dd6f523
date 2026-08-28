@@ -1,0 +1,29 @@
+.prettierrc
+  s_3b2abc05d4aebd::t_7efa60699b61ab 1-4
+LICENSE
+  s_3b2abc05d4aebd::t_e817754981866e 1-21
+README.md
+  s_3b2abc05d4aebd::t_54598ac9c3af5a 1-59
+package-lock.json
+  s_3b2abc05d4aebd::t_8afc7ccdb7293a 1-1013
+package.json
+  s_3b2abc05d4aebd::t_200958a78de9d0 1-42
+src/parseArgs.ts
+  s_3b2abc05d4aebd::t_19fb02c8e8f2be 1-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "370b7d74bac2d566fb268ba22b4b80467dd6f523",
+  "prompts": {},
+  "sessions": {
+    "s_3b2abc05d4aebd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55cb2d06-8e5b-4f15-893d-173b2ae45764",
+        "model": "claude-fable-5"
+      },
+      "human_author": "adamjsturge <adamjsturge@gmail.com>"
+    }
+  }
+}
