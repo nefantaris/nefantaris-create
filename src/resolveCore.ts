@@ -2,24 +2,27 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { CreateNefantarisError } from "./CreateNefantarisError.js";
 
-export type ResolvedCore = {
+type CoreInvocation = {
     command: string;
     args: string[];
     describe: string;
-    how: "environment" | "sibling" | "registry";
 };
+
+type LocalCoreTier = "environment" | "sibling";
+
+export type ResolvedCore =
+    | (CoreInvocation & { how: LocalCoreTier; coreDir: string })
+    | (CoreInvocation & { how: "registry" });
 
 const coreBinRelativePath = "dist/cli/index.js";
 const corePackageSpec = "@nefantaris/core@latest";
 
-const localCore = (
-    coreDir: string,
-    how: "environment" | "sibling"
-): ResolvedCore => ({
+const localCore = (coreDir: string, how: LocalCoreTier): ResolvedCore => ({
     command: process.execPath,
     args: [join(coreDir, coreBinRelativePath)],
     describe: coreDir,
     how,
+    coreDir,
 });
 
 const resolveEnvironmentCore = (): ResolvedCore | undefined => {

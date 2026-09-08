@@ -32,3 +32,13 @@ test("rejects an unknown bare theme name and lists the valid ones", async () =>
         assert.match(result.stderr, /nefantaris-theme-base/);
         assert.match(result.stderr, /nefantaris-theme-docs/);
     }));
+
+test("rejects a duplicated --no-install flag with usage", async () =>
+    withTempDir(async (tempDir) => {
+        const result = await runCli(
+            ["my-site", "--no-install", "--no-install"],
+            tempDir
+        );
+        assert.equal(result.code, 1);
+        assert.match(result.stderr, /Usage:/);
+    }));

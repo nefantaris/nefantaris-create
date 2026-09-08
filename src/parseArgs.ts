@@ -8,6 +8,7 @@ export const usage = [
     "Options:",
     "    --theme <name|git-url|path>   Theme to install (default: nefantaris-theme-base)",
     "    --yes                         Skip all questions and use defaults",
+    "    --no-install                  Skip running npm install in the new site",
     "    --clone-base <url-or-path>    Where first-party repositories are cloned from",
     "                                  (default: https://github.com/nefantaris)",
     "    --help                        Show this message",
@@ -20,6 +21,7 @@ export type CreateOptions = {
     themeArg: string | undefined;
     cloneBase: string;
     skipPrompts: boolean;
+    skipInstall: boolean;
 };
 
 export type ParsedArgs =
@@ -46,6 +48,7 @@ export const parseArgs = (argv: string[]): ParsedArgs => {
     let themeArg: string | undefined;
     let cloneBase: string | undefined;
     let skipPrompts = false;
+    let skipInstall = false;
     for (let index = 0; index < argv.length; index += 1) {
         const arg = argv[index];
         if (arg === "--help") {
@@ -59,6 +62,11 @@ export const parseArgs = (argv: string[]): ParsedArgs => {
                 return { kind: "usage" };
             }
             skipPrompts = true;
+        } else if (arg === "--no-install") {
+            if (skipInstall) {
+                return { kind: "usage" };
+            }
+            skipInstall = true;
         } else if (arg === "--theme") {
             const value = readFlagValue(argv, index, themeArg);
             if (value === undefined) {
@@ -87,5 +95,6 @@ export const parseArgs = (argv: string[]): ParsedArgs => {
         themeArg,
         cloneBase: cloneBase ?? defaultCloneBase,
         skipPrompts,
+        skipInstall,
     };
 };

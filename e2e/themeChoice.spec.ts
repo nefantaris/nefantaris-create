@@ -15,6 +15,7 @@ test("parseArgs defaults to interactive creation", () => {
         themeArg: undefined,
         cloneBase: defaultCloneBase,
         skipPrompts: false,
+        skipInstall: false,
     });
 });
 
@@ -23,6 +24,7 @@ test("parseArgs reads the positional and every flag", () => {
         parseArgs([
             "my-site",
             "--yes",
+            "--no-install",
             "--theme",
             "nefantaris-theme-docs",
             "--clone-base",
@@ -34,6 +36,7 @@ test("parseArgs reads the positional and every flag", () => {
             themeArg: "nefantaris-theme-docs",
             cloneBase: "/repos",
             skipPrompts: true,
+            skipInstall: true,
         }
     );
 });
@@ -51,6 +54,7 @@ test("parseArgs rejects malformed invocations", () => {
         ["--clone-base"],
         ["--clone-base", "a", "--clone-base", "b"],
         ["--yes", "--yes"],
+        ["--no-install", "--no-install"],
         ["--unknown"],
         ["site-a", "site-b"],
     ];

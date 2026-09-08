@@ -9,7 +9,6 @@ export const packageRoot = resolve(
 export const workspaceRoot = resolve(packageRoot, "..");
 export const builtCliPath = join(packageRoot, "dist/cli/index.js");
 export const workspaceCoreDir = join(workspaceRoot, "nefantaris-core");
-export const coreBinPath = join(workspaceCoreDir, "dist/cli/index.js");
 
 const excludedNames = new Set([".git", ".nefantaris", "node_modules", "dist"]);
 

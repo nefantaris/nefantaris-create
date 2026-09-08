@@ -2,9 +2,10 @@ import { existsSync, readdirSync } from "node:fs";
 import { basename, dirname, relative, resolve } from "node:path";
 import { CreateNefantarisError } from "./CreateNefantarisError.js";
 import { ensureSibling, readThemeRequires } from "./ensureSiblings.js";
+import { linkLocalCore } from "./linkLocalCore.js";
 import { type CreateOptions, usage } from "./parseArgs.js";
 import { promptSiteDir, promptTheme } from "./prompts.js";
-import { resolveCore, type ResolvedCore } from "./resolveCore.js";
+import { resolveCore } from "./resolveCore.js";
 import { runCommand } from "./run.js";
 import { classifyTheme, type ThemeChoice } from "./themeChoice.js";
 
@@ -109,28 +110,47 @@ const gitInitSite = async (
     }
 };
 
+const installDependencies = async (
+    siteDir: string,
+    siteDirArg: string
+): Promise<boolean> => {
+    let exitCode: number;
+    try {
+        exitCode = await runCommand(
+            "npm",
+            ["install", "--no-audit", "--no-fund"],
+            siteDir
+        );
+    } catch {
+        exitCode = 1;
+    }
+    if (exitCode === 0) {
+        return true;
+    }
+    console.error(
+        `npm install failed in ${siteDirArg} — run it yourself, then "npm run dev".`
+    );
+    return false;
+};
+
+const quoteIfWhitespace = (value: string): string =>
+    /\s/.test(value) ? `"${value}"` : value;
+
 const printNextSteps = (
     siteDirArg: string,
     themeName: string,
-    core: ResolvedCore
+    hasInstalledDependencies: boolean
 ): void => {
     console.log(`Created ${siteDirArg} (${themeName}).`);
     console.log("");
     console.log("Next steps:");
-    console.log(`    cd ${siteDirArg}`);
-    if (core.how === "registry") {
-        console.log("    npx --package=@nefantaris/core nef dev .");
-        console.log("");
-        console.log(
-            "Install @nefantaris/core globally to shorten that to a plain nef command."
-        );
-        return;
+    console.log(`    cd ${quoteIfWhitespace(siteDirArg)}`);
+    if (!hasInstalledDependencies) {
+        console.log("    npm install");
     }
-    console.log(`    node ${core.args.join(" ")} dev .`);
+    console.log("    npm run dev");
     console.log("");
-    console.log(
-        `Nefantaris core was resolved from a local checkout (${core.how}), so the dev command runs it directly rather than through npx.`
-    );
+    console.log("npm run build writes the deployable site to dist/.");
 };
 
 export const createSite = async (options: CreateOptions): Promise<void> => {
@@ -165,11 +185,18 @@ export const createSite = async (options: CreateOptions): Promise<void> => {
     const initExitCode = await runCommand(
         core.command,
         [...core.args, "init", siteDir, "--theme", theme.themeSource],
-        process.cwd()
+        process.cwd(),
+        ["ignore", "ignore", "inherit"]
     );
     if (initExitCode !== 0) {
         process.exit(initExitCode);
     }
+    if (core.how !== "registry") {
+        linkLocalCore(siteDir, core.coreDir);
+    }
     await gitInitSite(siteDir, parentDir);
-    printNextSteps(siteDirArg, theme.themeName, core);
+    const hasInstalledDependencies = options.skipInstall
+        ? false
+        : await installDependencies(siteDir, siteDirArg);
+    printNextSteps(siteDirArg, theme.themeName, hasInstalledDependencies);
 };

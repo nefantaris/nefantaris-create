@@ -20,6 +20,7 @@ directory and the theme. Every question can be skipped with a flag.
 | ------------------------------- | ----------------------------------------------------------------------------------------- |
 | `--theme <name\|git-url\|path>` | Theme to install (default: `nefantaris-theme-base`)                                       |
 | `--yes`                         | Skip all questions and use defaults                                                       |
+| `--no-install`                  | Skip running `npm install` in the new site                                                |
 | `--clone-base <url-or-path>`    | Where first-party repositories are cloned from (default: `https://github.com/nefantaris`) |
 | `--help`                        | Show usage                                                                                |
 | `--version`                     | Print the version                                                                         |
@@ -31,9 +32,20 @@ directory and the theme. Every question can be skipped with a flag.
 2. Reads the theme's `theme.json` and clones each plugin in its `requires`
    array as a sibling too.
 3. Runs Nefantaris core's `nef init <siteDir> --theme <source>` to scaffold
-   `nefantaris.json`, starter pages, a first post, and the site `.gitignore`.
-4. Runs `git init` in the new site, unless the parent directory is already
+   `nefantaris.json`, starter pages, a first post, the site `.gitignore`, and
+   a `package.json` whose `dev` and `build` scripts call `nef` and whose only
+   devDependency is `@nefantaris/core`.
+4. When core came from a local checkout rather than the registry, rewrites
+   that devDependency to a `file:` path pointing at the checkout.
+5. Runs `git init` in the new site, unless the parent directory is already
    inside a git repository.
+6. Runs `npm install` in the new site (skipped with `--no-install`). If the
+   install fails, the site is still created and the next steps tell you to run
+   it yourself.
+
+The next steps are then just `cd <siteDir>` and `npm run dev`. `npm run build`
+writes the deployable site to `dist/`, so on Cloudflare Pages the build command
+is `npm run build` and the output directory is `dist`.
 
 ## Finding Nefantaris core
 
@@ -50,7 +62,10 @@ current when this package was last released, and a floating range would still
 be resolved once at install time and then cached. Resolving the dist-tag at
 run time instead means a core release reaches new sites immediately, and this
 package never needs a release just to keep up. The two local tiers come first
-so a checkout you are working in always wins over the registry.
+so a checkout you are working in always wins over the registry. When a local
+tier wins, the new site's `@nefantaris/core` devDependency is written as a
+`file:` path to that checkout so `npm run dev` runs it; from the registry tier
+it stays the exact published version that `nef init` pinned.
 
 ## Publishing
 
