@@ -118,10 +118,18 @@ const printNextSteps = (
     console.log("");
     console.log("Next steps:");
     console.log(`    cd ${siteDirArg}`);
+    if (core.how === "dependency") {
+        console.log("    npx --package=@nefantaris/core nef dev .");
+        console.log("");
+        console.log(
+            "Install @nefantaris/core globally to shorten that to a plain nef command."
+        );
+        return;
+    }
     console.log(`    node ${core.binPath} dev .`);
     console.log("");
     console.log(
-        "Nefantaris core is not published to npm yet, so the dev command runs a local checkout directly; once core is published this becomes a plain npx command."
+        `Nefantaris core was resolved from a local checkout (${core.how}), so the dev command runs it directly rather than through npx.`
     );
 };
 
