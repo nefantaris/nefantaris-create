@@ -46,14 +46,22 @@ Nefantaris core is resolved in this order, first hit wins:
 
 ## Publishing
 
-Publishing is deferred until Nefantaris core is on npm; core is published
-first. Each release ships under both unscoped names:
+Releases happen in CI only — nobody publishes from a laptop. Bump the version,
+merge to `main`, then push a matching tag:
 
 ```
-npm publish
-npm pkg set name=create-nef && npm publish && git checkout package.json
+npm version minor
+git push --follow-tags
 ```
 
-The first command publishes `create-nefantaris`, the second temporarily
-renames the package to publish `create-nef`, then restores the manifest. Both
-names must be published for every release.
+`.github/workflows/publish.yml` refuses to run if the tag and the manifest
+version disagree, then publishes the same tarball under both unscoped names:
+`create-nefantaris` first, then `create-nef`, restoring the manifest name
+afterwards. Both names ship on every release. A name whose version is already
+on the registry is skipped, so a re-run after a partial failure is safe.
+
+Authentication is npm trusted publishing (OIDC) — there is no npm token in
+this repository. Both names must have a trusted publisher on npmjs.com
+pointing at `nefantaris/nefantaris-create` and the workflow filename
+`publish.yml`; the fields are case-sensitive and must match exactly.
+Provenance attestations are generated automatically.
