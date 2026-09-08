@@ -1,6 +1,6 @@
 {
     "name": "create-nefantaris",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Bootstraps a content-only Nefantaris site with one npx command",
     "license": "MIT",
     "author": "Adam Sturge",
