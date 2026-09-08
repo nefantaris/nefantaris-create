@@ -1,0 +1,21 @@
+package-lock.json
+  s_5a3d4b0ee67480::t_29a11c60bfa5fb 12-13,499-542,553-558,899-1010,1053-1070,1095-1115,1131-2063,2080-2160,2167-2190,2251-2377
+package.json
+  s_5a3d4b0ee67480::t_85578d68224cda 35-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "4b7295b42ca8b4dbf93f97501016563307366c6f",
+  "prompts": {},
+  "sessions": {
+    "s_5a3d4b0ee67480": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a410814-3db5-486e-9f73-20832aaea094",
+        "model": "claude-opus-5"
+      },
+      "human_author": "adamjsturge <adamjsturge@gmail.com>"
+    }
+  }
+}
