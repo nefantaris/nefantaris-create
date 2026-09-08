@@ -1,0 +1,28 @@
+package.json
+  s_5a3d4b0ee67480::t_035bcb28a966ca 35
+README.md
+  s_5a3d4b0ee67480::t_e814e4cd7269f6 44-53
+src/resolveCore.ts
+  s_5a3d4b0ee67480::t_e5536176eabf4f 1-2,6-9,13-23,36,41,44,47-57
+src/createSite.ts
+  s_5a3d4b0ee67480::t_035bcb28a966ca 121,156,166-167
+  s_5a3d4b0ee67480::t_d13a61f16d9809 129
+package-lock.json
+  s_5a3d4b0ee67480::t_cb44dc571bd361 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "46af4e11363838dcc3b7967a7ab46ca39a236ee8",
+  "prompts": {},
+  "sessions": {
+    "s_5a3d4b0ee67480": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a410814-3db5-486e-9f73-20832aaea094",
+        "model": "claude-opus-5"
+      },
+      "human_author": "adamjsturge <adamjsturge@gmail.com>"
+    }
+  }
+}
