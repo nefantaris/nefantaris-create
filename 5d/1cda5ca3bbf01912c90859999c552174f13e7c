@@ -1,0 +1,37 @@
+src/resolveCore.ts
+  s_cd71ab353fe72d::t_8750246ab04678 5,11-16,20,25
+src/parseArgs.ts
+  s_cd71ab353fe72d::t_8750246ab04678 11,24,51,65-69,98
+src/run.ts
+  s_cd71ab353fe72d::t_8750246ab04678 1,7,9,25,35,37,42-43,46-47,53
+  s_cd71ab353fe72d::t_d4f02c1650eec1 2-6,8,10-24,26-34,36,38-41,44-45,56-57
+e2e/failures.spec.ts
+  s_cd71ab353fe72d::t_8750246ab04678 35-44
+src/createSite.ts
+  s_cd71ab353fe72d::t_8750246ab04678 5,8,113-138,142,147-149,151,153,188-189,194-196,198-201
+src/linkLocalCore.ts
+  s_cd71ab353fe72d::t_8750246ab04678 1-31
+e2e/createSite.spec.ts
+  s_cd71ab353fe72d::t_8750246ab04678 15-17,25-27,33-44,46,51-62
+  s_cd71ab353fe72d::t_c6a7a2e62e794d 63-64
+e2e/themeChoice.spec.ts
+  s_cd71ab353fe72d::t_8750246ab04678 18,27,39,57
+README.md
+  s_cd71ab353fe72d::t_8750246ab04678 23,35-40,42-48,65-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "5d1cda5ca3bbf01912c90859999c552174f13e7c",
+  "prompts": {},
+  "sessions": {
+    "s_cd71ab353fe72d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2bfc29f0-1868-4245-86dd-f8aa73e47fba",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "adamjsturge <adamjsturge@gmail.com>"
+    }
+  }
+}
