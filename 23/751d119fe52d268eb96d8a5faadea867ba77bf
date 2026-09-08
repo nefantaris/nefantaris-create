@@ -1,0 +1,19 @@
+.github/workflows/publish.yml
+  s_5a3d4b0ee67480::t_19dd1965679847 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "23751d119fe52d268eb96d8a5faadea867ba77bf",
+  "prompts": {},
+  "sessions": {
+    "s_5a3d4b0ee67480": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a410814-3db5-486e-9f73-20832aaea094",
+        "model": "claude-opus-5"
+      },
+      "human_author": "adamjsturge <adamjsturge@gmail.com>"
+    }
+  }
+}
