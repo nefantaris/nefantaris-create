@@ -1,0 +1,19 @@
+src/createSite.ts
+  s_5a3d4b0ee67480::t_a4af7825ca2dd0 121-128,132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "a34cc604609bbf674a2970dffa71be432f0bdafb",
+  "prompts": {},
+  "sessions": {
+    "s_5a3d4b0ee67480": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a410814-3db5-486e-9f73-20832aaea094",
+        "model": "claude-opus-5"
+      },
+      "human_author": "adamjsturge <adamjsturge@gmail.com>"
+    }
+  }
+}
