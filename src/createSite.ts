@@ -118,7 +118,7 @@ const printNextSteps = (
     console.log("");
     console.log("Next steps:");
     console.log(`    cd ${siteDirArg}`);
-    if (core.how === "dependency") {
+    if (core.how === "registry") {
         console.log("    npx --package=@nefantaris/core nef dev .");
         console.log("");
         console.log(
@@ -126,7 +126,7 @@ const printNextSteps = (
         );
         return;
     }
-    console.log(`    node ${core.binPath} dev .`);
+    console.log(`    node ${core.args.join(" ")} dev .`);
     console.log("");
     console.log(
         `Nefantaris core was resolved from a local checkout (${core.how}), so the dev command runs it directly rather than through npx.`
@@ -153,7 +153,7 @@ export const createSite = async (options: CreateOptions): Promise<void> => {
     const choice = classifyTheme(themeArg, options.cloneBase);
     await assertGitAvailable();
     const core = resolveCore(parentDir);
-    console.log(`Using Nefantaris core at ${core.coreDir}`);
+    console.log(`Using Nefantaris core: ${core.describe}`);
     const theme = await materializeTheme(choice, parentDir, siteDir);
     for (const pluginName of readThemeRequires(theme.themeDir)) {
         await ensureSibling(
@@ -163,8 +163,8 @@ export const createSite = async (options: CreateOptions): Promise<void> => {
         );
     }
     const initExitCode = await runCommand(
-        process.execPath,
-        [core.binPath, "init", siteDir, "--theme", theme.themeSource],
+        core.command,
+        [...core.args, "init", siteDir, "--theme", theme.themeSource],
         process.cwd()
     );
     if (initExitCode !== 0) {

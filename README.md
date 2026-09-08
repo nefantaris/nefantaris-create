@@ -41,8 +41,16 @@ Nefantaris core is resolved in this order, first hit wins:
 
 1. The `NEFANTARIS_CORE_DIR` environment variable, pointing at a built
    checkout of `nefantaris-core`.
-2. An installed `@nefantaris/core` dependency (once core is published).
-3. A `nefantaris-core` checkout sitting next to the new site directory.
+2. A `nefantaris-core` checkout sitting next to the new site directory.
+3. `@nefantaris/core@latest`, run straight from the registry with npx.
+
+There is deliberately no `@nefantaris/core` dependency in this package. A
+pinned dependency would freeze every new site at whichever core version was
+current when this package was last released, and a floating range would still
+be resolved once at install time and then cached. Resolving the dist-tag at
+run time instead means a core release reaches new sites immediately, and this
+package never needs a release just to keep up. The two local tiers come first
+so a checkout you are working in always wins over the registry.
 
 ## Publishing
 
