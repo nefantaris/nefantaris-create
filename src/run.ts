@@ -5,6 +5,12 @@ import { CreateNefantarisError } from "./CreateNefantarisError.js";
 
 type SpawnPlan = { command: string; args: string[] };
 
+export type CommandResult = {
+    exitCode: number;
+    stdout: string;
+    stderr: string;
+};
+
 const npmCliEntries = { npm: "npm-cli.js", npx: "npx-cli.js" };
 
 type NpmCommand = keyof typeof npmCliEntries;
@@ -58,5 +64,32 @@ export const runCommand = (
         child.on("error", rejectPromise);
         child.on("exit", (code) => {
             resolvePromise(code ?? 1);
+        });
+    });
+
+export const captureCommand = (
+    command: string,
+    args: string[],
+    cwd: string,
+    extraEnv: Record<string, string> = {}
+): Promise<CommandResult> =>
+    new Promise((resolvePromise, rejectPromise) => {
+        const plan = windowsSafe(command, args);
+        const child = spawn(plan.command, plan.args, {
+            cwd,
+            env: { ...process.env, ...extraEnv },
+            stdio: ["ignore", "pipe", "pipe"],
+        });
+        const stdoutChunks: Buffer[] = [];
+        const stderrChunks: Buffer[] = [];
+        child.stdout?.on("data", (chunk: Buffer) => stdoutChunks.push(chunk));
+        child.stderr?.on("data", (chunk: Buffer) => stderrChunks.push(chunk));
+        child.on("error", rejectPromise);
+        child.on("close", (code) => {
+            resolvePromise({
+                exitCode: code ?? 1,
+                stdout: Buffer.concat(stdoutChunks).toString("utf8"),
+                stderr: Buffer.concat(stderrChunks).toString("utf8"),
+            });
         });
     });

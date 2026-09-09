@@ -1,9 +1,10 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { basename, dirname, relative, resolve } from "node:path";
 import { CreateNefantarisError } from "./CreateNefantarisError.js";
-import { ensureSibling, readThemeRequires } from "./ensureSiblings.js";
 import { linkLocalCore } from "./linkLocalCore.js";
 import { type CreateOptions, usage } from "./parseArgs.js";
+import { pinNamedPlugins } from "./pinPlugins.js";
+import { resolvePinnedVersion } from "./pinnedVersion.js";
 import { promptSiteDir, promptTheme } from "./prompts.js";
 import { resolveCore } from "./resolveCore.js";
 import { runCommand } from "./run.js";
@@ -11,10 +12,9 @@ import { classifyTheme, type ThemeChoice } from "./themeChoice.js";
 
 const defaultThemeName = "nefantaris-theme-base";
 
-type MaterializedTheme = {
-    themeDir: string;
-    themeSource: string;
+type ThemeSelection = {
     themeName: string;
+    initArgs: string[];
 };
 
 const resolveSiteDirArg = async (
@@ -63,28 +63,35 @@ const assertGitAvailable = async (): Promise<void> => {
     }
 };
 
-const materializeTheme = async (
+const selectTheme = async (
     choice: ThemeChoice,
-    parentDir: string,
-    siteDir: string
-): Promise<MaterializedTheme> => {
+    siteDir: string,
+    themeVersionArg: string | undefined
+): Promise<ThemeSelection> => {
     if (choice.kind === "localPath") {
+        if (themeVersionArg !== undefined) {
+            throw new CreateNefantarisError(
+                "--theme-version pins a git theme — pass a git URL or a first-party theme name in --theme, or drop --theme-version to use the local path as it is"
+            );
+        }
         return {
-            themeDir: choice.themeDir,
-            themeSource: relative(siteDir, choice.themeDir),
             themeName: basename(choice.themeDir),
+            initArgs: ["--theme", relative(siteDir, choice.themeDir)],
         };
     }
-    const themeDir = await ensureSibling(
-        choice.name,
-        parentDir,
-        choice.cloneUrl
-    );
+    const version =
+        themeVersionArg ?? (await resolvePinnedVersion("theme", choice.url));
+    console.log(`Pinned theme ${choice.name} to ${choice.url} at ${version}`);
     return {
-        themeDir,
-        themeSource: `../${choice.name}`,
         themeName: choice.name,
+        initArgs: ["--theme", choice.url, "--theme-version", version],
     };
+};
+
+const discardNewSite = (siteDir: string, isNewDir: boolean): void => {
+    if (isNewDir) {
+        rmSync(siteDir, { recursive: true, force: true });
+    }
 };
 
 const gitInitSite = async (
@@ -164,7 +171,8 @@ export const createSite = async (options: CreateOptions): Promise<void> => {
     );
     const siteDir = resolve(process.cwd(), siteDirArg);
     const parentDir = dirname(siteDir);
-    if (existsSync(siteDir) && readdirSync(siteDir).length > 0) {
+    const isNewDir = !existsSync(siteDir);
+    if (!isNewDir && readdirSync(siteDir).length > 0) {
         throw new CreateNefantarisError(
             `${siteDir} already exists and is not empty`
         );
@@ -174,24 +182,23 @@ export const createSite = async (options: CreateOptions): Promise<void> => {
     await assertGitAvailable();
     const core = resolveCore(parentDir);
     console.log(`Using Nefantaris core: ${core.describe}`);
-    const theme = await materializeTheme(choice, parentDir, siteDir);
-    for (const pluginName of readThemeRequires(theme.themeDir)) {
-        await ensureSibling(
-            pluginName,
-            parentDir,
-            `${options.cloneBase}/${pluginName}`
-        );
-    }
+    const theme = await selectTheme(choice, siteDir, options.themeVersionArg);
     const initExitCode = await runCommand(
         core.command,
-        [...core.args, "init", siteDir, "--theme", theme.themeSource],
+        [...core.args, "init", siteDir, ...theme.initArgs],
         process.cwd(),
         ["ignore", "ignore", "inherit"]
     );
     if (initExitCode !== 0) {
         process.exit(initExitCode);
     }
-    if (core.how !== "registry") {
+    try {
+        await pinNamedPlugins(siteDir, options.cloneBase);
+    } catch (error) {
+        discardNewSite(siteDir, isNewDir);
+        throw error;
+    }
+    if (core.how === "environment") {
         linkLocalCore(siteDir, core.coreDir);
     }
     await gitInitSite(siteDir, parentDir);

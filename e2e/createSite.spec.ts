@@ -2,32 +2,50 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
+import { createLocalGitFixtures } from "./localGitFixtures.js";
 import { readJsonObject, readRecordField } from "./readJsonObject.js";
 import { runCli } from "./runCli.js";
 import { runProcess } from "./runProcess.js";
 import {
     copyTreeWithoutArtifacts,
-    copyWorkspaceSibling,
     workspaceRoot,
 } from "./workspaceSiblings.js";
 import { withTempDir } from "./withTempDir.js";
 
+const themeName = "nefantaris-theme-base";
+const pluginName = "nefantaris-plugin-date-fns";
+
 const nextStepsBlock = (stdout: string): string =>
     stdout.slice(stdout.indexOf("Next steps:"));
 
-test("creates a buildable site next to existing workspace siblings", async () =>
+test("creates a buildable site pinned to the clone base", async () =>
     withTempDir(async (tempDir) => {
-        await copyWorkspaceSibling("nefantaris-theme-base", tempDir);
-        await copyWorkspaceSibling("nefantaris-plugin-date-fns", tempDir);
-        const result = await runCli(["my-site"], tempDir);
+        const remotesDir = join(tempDir, "remotes");
+        const remotes = await createLocalGitFixtures(remotesDir, [
+            { name: themeName, tags: ["v1.0.0"] },
+            { name: pluginName },
+        ]);
+        const result = await runCli(
+            ["my-site", "--clone-base", remotesDir],
+            tempDir
+        );
         assert.equal(result.code, 0, result.stderr);
-        assert.match(result.stdout, /Using existing/);
         const nextSteps = nextStepsBlock(result.stdout);
         assert.match(nextSteps, /npm run dev/);
         assert.doesNotMatch(nextSteps, /npm install/);
         const siteDir = join(tempDir, "my-site");
         const config = await readJsonObject(join(siteDir, "nefantaris.json"));
-        assert.deepEqual(config.plugins, ["nefantaris-plugin-date-fns"]);
+        assert.deepEqual(config.theme, {
+            source: remotes[themeName].url,
+            version: "v1.0.0",
+        });
+        assert.deepEqual(config.plugins, [
+            {
+                name: pluginName,
+                source: remotes[pluginName].url,
+                version: remotes[pluginName].headSha,
+            },
+        ]);
         assert.ok(existsSync(join(siteDir, "content/pages/index.md")));
         assert.ok(existsSync(join(siteDir, ".git")));
         const manifest = await readJsonObject(join(siteDir, "package.json"));
@@ -50,9 +68,15 @@ test("creates a buildable site next to existing workspace siblings", async () =>
 
 test("--no-install leaves the dependency install to the user", async () =>
     withTempDir(async (tempDir) => {
-        await copyWorkspaceSibling("nefantaris-theme-base", tempDir);
-        await copyWorkspaceSibling("nefantaris-plugin-date-fns", tempDir);
-        const result = await runCli(["my-site", "--no-install"], tempDir);
+        const remotesDir = join(tempDir, "remotes");
+        await createLocalGitFixtures(remotesDir, [
+            { name: themeName, tags: ["v1.0.0"] },
+            { name: pluginName },
+        ]);
+        const result = await runCli(
+            ["my-site", "--clone-base", remotesDir, "--no-install"],
+            tempDir
+        );
         assert.equal(result.code, 0, result.stderr);
         const siteDir = join(tempDir, "my-site");
         assert.ok(existsSync(join(siteDir, "package.json")));
@@ -62,42 +86,70 @@ test("--no-install leaves the dependency install to the user", async () =>
         assert.match(nextSteps, /npm run dev/);
     }));
 
-test("creates a site with the docs theme and no plugins", async () =>
+test("creates a site with the docs theme pinned to its latest commit and no plugins", async () =>
     withTempDir(async (tempDir) => {
-        await copyWorkspaceSibling("nefantaris-theme-docs", tempDir);
+        const remotesDir = join(tempDir, "remotes");
+        const remotes = await createLocalGitFixtures(remotesDir, [
+            { name: "nefantaris-theme-docs" },
+        ]);
         const result = await runCli(
-            ["my-site", "--theme", "nefantaris-theme-docs"],
+            [
+                "my-site",
+                "--theme",
+                "nefantaris-theme-docs",
+                "--clone-base",
+                remotesDir,
+                "--no-install",
+            ],
             tempDir
         );
         assert.equal(result.code, 0, result.stderr);
         const config = await readJsonObject(
             join(tempDir, "my-site/nefantaris.json")
         );
-        const theme = readRecordField(config, "theme");
-        assert.equal(theme.source, "../nefantaris-theme-docs");
+        assert.deepEqual(config.theme, {
+            source: remotes["nefantaris-theme-docs"].url,
+            version: remotes["nefantaris-theme-docs"].headSha,
+        });
         assert.deepEqual(config.plugins, []);
     }));
 
-test("uses a local theme path without creating a theme sibling", async () =>
+test("uses a local theme path as it is and still pins its plugins", async () =>
     withTempDir(async (tempDir) => {
-        await copyWorkspaceSibling("nefantaris-plugin-date-fns", tempDir);
-        const themeCopyDir = join(
-            tempDir,
-            "theme-copies/nefantaris-theme-base"
-        );
+        const remotesDir = join(tempDir, "remotes");
+        const remotes = await createLocalGitFixtures(remotesDir, [
+            { name: pluginName },
+        ]);
+        const themeCopyDir = join(tempDir, "theme-copies", themeName);
         await copyTreeWithoutArtifacts(
-            join(workspaceRoot, "nefantaris-theme-base"),
+            join(workspaceRoot, themeName),
             themeCopyDir
         );
         const result = await runCli(
-            ["my-site", "--theme", themeCopyDir],
+            [
+                "my-site",
+                "--theme",
+                themeCopyDir,
+                "--clone-base",
+                remotesDir,
+                "--no-install",
+            ],
             tempDir
         );
         assert.equal(result.code, 0, result.stderr);
-        assert.ok(!existsSync(join(tempDir, "nefantaris-theme-base")));
+        assert.ok(!existsSync(join(tempDir, themeName)));
         const config = await readJsonObject(
             join(tempDir, "my-site/nefantaris.json")
         );
-        const theme = readRecordField(config, "theme");
-        assert.equal(theme.source, "../theme-copies/nefantaris-theme-base");
+        assert.deepEqual(config.theme, {
+            source: "../theme-copies/nefantaris-theme-base",
+            version: "local",
+        });
+        assert.deepEqual(config.plugins, [
+            {
+                name: pluginName,
+                source: remotes[pluginName].url,
+                version: remotes[pluginName].headSha,
+            },
+        ]);
     }));

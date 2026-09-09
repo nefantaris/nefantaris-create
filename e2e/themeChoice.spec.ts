@@ -13,6 +13,7 @@ test("parseArgs defaults to interactive creation", () => {
         kind: "create",
         siteDirArg: undefined,
         themeArg: undefined,
+        themeVersionArg: undefined,
         cloneBase: defaultCloneBase,
         skipPrompts: false,
         skipInstall: false,
@@ -27,6 +28,8 @@ test("parseArgs reads the positional and every flag", () => {
             "--no-install",
             "--theme",
             "nefantaris-theme-docs",
+            "--theme-version",
+            "v1.0.0",
             "--clone-base",
             "/repos",
         ]),
@@ -34,6 +37,7 @@ test("parseArgs reads the positional and every flag", () => {
             kind: "create",
             siteDirArg: "my-site",
             themeArg: "nefantaris-theme-docs",
+            themeVersionArg: "v1.0.0",
             cloneBase: "/repos",
             skipPrompts: true,
             skipInstall: true,
@@ -51,6 +55,8 @@ test("parseArgs rejects malformed invocations", () => {
         ["--theme"],
         ["--theme", "--yes"],
         ["--theme", "a", "--theme", "b"],
+        ["--theme-version"],
+        ["--theme-version", "a", "--theme-version", "b"],
         ["--clone-base"],
         ["--clone-base", "a", "--clone-base", "b"],
         ["--yes", "--yes"],
@@ -63,26 +69,26 @@ test("parseArgs rejects malformed invocations", () => {
     }
 });
 
-test("classifyTheme treats URLs as clones named after the repository", () => {
+test("classifyTheme treats URLs as git themes named after the repository", () => {
     assert.deepEqual(
         classifyTheme("https://example.test/x/my-theme.git", cloneBase),
         {
-            kind: "clone",
+            kind: "git",
             name: "my-theme",
-            cloneUrl: "https://example.test/x/my-theme.git",
+            url: "https://example.test/x/my-theme.git",
         }
     );
     assert.deepEqual(
         classifyTheme("git@example.test:x/my-theme.git", cloneBase),
         {
-            kind: "clone",
+            kind: "git",
             name: "my-theme",
-            cloneUrl: "git@example.test:x/my-theme.git",
+            url: "git@example.test:x/my-theme.git",
         }
     );
 });
 
-test("classifyTheme resolves local paths without cloning", () => {
+test("classifyTheme resolves local paths without pinning", () => {
     assert.deepEqual(classifyTheme("./themes/mine", cloneBase), {
         kind: "localPath",
         themeDir: resolve("themes/mine"),
@@ -101,16 +107,16 @@ test("classifyTheme resolves local paths without cloning", () => {
     });
 });
 
-test("classifyTheme clones first-party names from the clone base", () => {
+test("classifyTheme points first-party names at the clone base", () => {
     assert.deepEqual(classifyTheme("nefantaris-theme-base", cloneBase), {
-        kind: "clone",
+        kind: "git",
         name: "nefantaris-theme-base",
-        cloneUrl: `${cloneBase}/nefantaris-theme-base`,
+        url: `${cloneBase}/nefantaris-theme-base`,
     });
     assert.deepEqual(classifyTheme("nefantaris-theme-docs", cloneBase), {
-        kind: "clone",
+        kind: "git",
         name: "nefantaris-theme-docs",
-        cloneUrl: `${cloneBase}/nefantaris-theme-docs`,
+        url: `${cloneBase}/nefantaris-theme-docs`,
     });
 });
 
