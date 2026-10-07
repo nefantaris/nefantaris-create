@@ -1,0 +1,26 @@
+README.md
+  h_f6cc9af9c0f13a 16-18,26,42-43
+e2e/createSite.spec.ts
+  h_f6cc9af9c0f13a 89-113
+e2e/themeChoice.spec.ts
+  h_f6cc9af9c0f13a 17,34-35,44,64-65
+src/createSite.ts
+  h_f6cc9af9c0f13a 8,33-44,192-196,205
+src/firstPartyThemes.ts
+  h_f6cc9af9c0f13a 8
+src/parseArgs.ts
+  h_f6cc9af9c0f13a 12,26,35-40,105
+src/prompts.ts
+  h_f6cc9af9c0f13a 20-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ee0beb66561a35bad064ed3400e906108d736ffa",
+  "prompts": {},
+  "humans": {
+    "h_f6cc9af9c0f13a": {
+      "author": "adamjsturge <adamjsturge@gmail.com>"
+    }
+  }
+}
