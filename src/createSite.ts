@@ -5,7 +5,7 @@ import { linkLocalCore } from "./linkLocalCore.js";
 import { type CreateOptions, usage } from "./parseArgs.js";
 import { pinNamedPlugins } from "./pinPlugins.js";
 import { resolvePinnedVersion } from "./pinnedVersion.js";
-import { promptSiteDir, promptTheme } from "./prompts.js";
+import { promptSiteDir, promptSiteName, promptTheme } from "./prompts.js";
 import { resolveCore } from "./resolveCore.js";
 import { runCommand } from "./run.js";
 import { classifyTheme, type ThemeChoice } from "./themeChoice.js";
@@ -28,6 +28,18 @@ const resolveSiteDirArg = async (
         return promptSiteDir();
     }
     throw new CreateNefantarisError(usage);
+};
+
+const resolveNameArgs = async (
+    nameArg: string | undefined,
+    siteDir: string,
+    isInteractive: boolean
+): Promise<string[]> => {
+    const folderName = basename(siteDir);
+    const name =
+        nameArg ??
+        (isInteractive ? await promptSiteName(folderName) : folderName);
+    return name === folderName ? [] : ["--name", name];
 };
 
 const resolveThemeArg = async (
@@ -177,6 +189,11 @@ export const createSite = async (options: CreateOptions): Promise<void> => {
             `${siteDir} already exists and is not empty`
         );
     }
+    const nameArgs = await resolveNameArgs(
+        options.nameArg,
+        siteDir,
+        isInteractive
+    );
     const themeArg = await resolveThemeArg(options.themeArg, isInteractive);
     const choice = classifyTheme(themeArg, options.cloneBase);
     await assertGitAvailable();
@@ -185,7 +202,7 @@ export const createSite = async (options: CreateOptions): Promise<void> => {
     const theme = await selectTheme(choice, siteDir, options.themeVersionArg);
     const initExitCode = await runCommand(
         core.command,
-        [...core.args, "init", siteDir, ...theme.initArgs],
+        [...core.args, "init", siteDir, ...theme.initArgs, ...nameArgs],
         process.cwd(),
         ["ignore", "ignore", "inherit"]
     );

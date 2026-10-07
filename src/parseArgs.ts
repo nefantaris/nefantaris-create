@@ -9,6 +9,7 @@ export const usage = [
     "    --theme <name|git-url|path>   Theme to install (default: nefantaris-theme-base)",
     "    --theme-version <ref>         Tag or commit to pin a git theme at (default: its newest",
     "                                  release tag, or its latest commit when it has no tags)",
+    "    --name <site name>            What the site is called (default: the folder name)",
     "    --yes                         Skip all questions and use defaults",
     "    --no-install                  Skip running npm install in the new site",
     "    --clone-base <url-or-path>    Where first-party themes and plugins are fetched from",
@@ -22,6 +23,7 @@ export type CreateOptions = {
     siteDirArg: string | undefined;
     themeArg: string | undefined;
     themeVersionArg: string | undefined;
+    nameArg: string | undefined;
     cloneBase: string;
     skipPrompts: boolean;
     skipInstall: boolean;
@@ -30,7 +32,12 @@ export type CreateOptions = {
 export type ParsedArgs =
     { kind: "help" } | { kind: "version" } | { kind: "usage" } | CreateOptions;
 
-const valueFlags = ["--theme", "--theme-version", "--clone-base"] as const;
+const valueFlags = [
+    "--theme",
+    "--theme-version",
+    "--name",
+    "--clone-base",
+] as const;
 const switchFlags = ["--yes", "--no-install"] as const;
 
 type ValueFlag = (typeof valueFlags)[number];
@@ -95,6 +102,7 @@ export const parseArgs = (argv: string[]): ParsedArgs => {
         siteDirArg,
         themeArg: values["--theme"],
         themeVersionArg: values["--theme-version"],
+        nameArg: values["--name"],
         cloneBase: values["--clone-base"] ?? defaultCloneBase,
         skipPrompts: switches.has("--yes"),
         skipInstall: switches.has("--no-install"),

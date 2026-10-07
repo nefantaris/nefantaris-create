@@ -13,8 +13,9 @@ npx create-nef [siteDir] [options]
 npx create-nefantaris [siteDir] [options]
 ```
 
-Both names run the same tool. Without flags it asks two questions: the site
-directory and the theme. Every question can be skipped with a flag.
+Both names run the same tool. Without flags it asks three questions: the site
+directory, what the site is called, and the theme. Every question can be
+skipped with a flag.
 
 ## Options
 
@@ -22,6 +23,7 @@ directory and the theme. Every question can be skipped with a flag.
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `--theme <name\|git-url\|path>` | Theme to install (default: `nefantaris-theme-base`)                                              |
 | `--theme-version <ref>`         | Tag or commit to pin a git theme at (default: newest release tag, else latest commit)            |
+| `--name <site name>`            | What the site is called (default: the folder name)                                               |
 | `--yes`                         | Skip all questions and use defaults                                                              |
 | `--no-install`                  | Skip running `npm install` in the new site                                                       |
 | `--clone-base <url-or-path>`    | Where first-party themes and plugins are fetched from (default: `https://github.com/nefantaris`) |
@@ -37,7 +39,8 @@ directory and the theme. Every question can be skipped with a flag.
    the tip of its default branch. A local path in `--theme` is used in place,
    relative to the site, and is never pinned.
 2. Runs Nefantaris core's `nef init <siteDir> --theme <url> --theme-version
-<ref>` to scaffold `nefantaris.json`, starter pages, a first post, the site
+<ref>`, plus `--name` when the site is called something other than its
+   folder, to scaffold `nefantaris.json`, starter pages, a first post, the site
    `.gitignore`, and a `package.json` whose `dev` and `build` scripts call
    `nef` and whose only devDependency is `@nefantaris/core` at the version
    that ran init. Init fetches the theme into the site's `.nefantaris/` and

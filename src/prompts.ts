@@ -18,6 +18,15 @@ export const promptSiteDir = async (): Promise<string> =>
         })
     );
 
+export const promptSiteName = async (folderName: string): Promise<string> =>
+    exitOnCancel(
+        await text({
+            message: "What should the site be called?",
+            placeholder: folderName,
+            defaultValue: folderName,
+        })
+    );
+
 const customThemeChoice = "custom-theme";
 
 export const promptTheme = async (): Promise<string> => {

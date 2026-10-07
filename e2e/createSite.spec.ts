@@ -86,6 +86,31 @@ test("--no-install leaves the dependency install to the user", async () =>
         assert.match(nextSteps, /npm run dev/);
     }));
 
+test("--name names the site instead of its folder", async () =>
+    withTempDir(async (tempDir) => {
+        const remotesDir = join(tempDir, "remotes");
+        await createLocalGitFixtures(remotesDir, [
+            { name: themeName, tags: ["v1.0.0"] },
+            { name: pluginName },
+        ]);
+        const result = await runCli(
+            [
+                "my-site",
+                "--name",
+                "Field Notes",
+                "--clone-base",
+                remotesDir,
+                "--no-install",
+            ],
+            tempDir
+        );
+        assert.equal(result.code, 0, result.stderr);
+        const config = await readJsonObject(
+            join(tempDir, "my-site/nefantaris.json")
+        );
+        assert.equal(config.name, "Field Notes");
+    }));
+
 test("creates a site with the docs theme pinned to its latest commit and no plugins", async () =>
     withTempDir(async (tempDir) => {
         const remotesDir = join(tempDir, "remotes");
